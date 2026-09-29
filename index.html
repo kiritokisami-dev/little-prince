@@ -1,0 +1,3240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Маленький принц — Путешествие по мирам</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+    width:100%;height:100%;overflow:hidden;
+    background:#02030b;color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    user-select:none
+}
+
+#game{
+    position:fixed;inset:0;overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 45%,rgba(75,55,180,.25),transparent 40%),
+      radial-gradient(circle at 10% 80%,rgba(0,130,220,.12),transparent 30%),
+      #02030b
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+
+#stars,#stars2{
+    position:absolute;inset:0;
+    pointer-events:none
+}
+
+.star{
+    position:absolute;
+    width:2px;height:2px;
+    border-radius:50%;
+    background:#fff;
+    opacity:.7;
+    animation:twinkle 3s ease-in-out infinite alternate
+}
+
+.star.big{
+    width:3px;height:3px;
+    box-shadow:0 0 8px #fff,0 0 18px rgba(120,180,255,.7)
+}
+
+@keyframes twinkle{
+    from{opacity:.15;transform:scale(.7)}
+    to{opacity:1;transform:scale(1.25)}
+}
+
+/* движущиеся звёзды */
+#stars2{
+    animation:spaceDrift 30s linear infinite
+}
+
+@keyframes spaceDrift{
+    from{transform:translate(0,0)}
+    50%{transform:translate(-18px,12px)}
+    to{transform:translate(0,0)}
+}
+
+.nebula{
+    position:absolute;
+    border-radius:50%;
+    pointer-events:none;
+    filter:blur(45px);
+    opacity:.16;
+    animation:nebulaFloat 12s ease-in-out infinite alternate
+}
+
+.nebula.one{
+    width:650px;height:420px;
+    left:-220px;top:20%;
+    background:#5639df
+}
+
+.nebula.two{
+    width:520px;height:370px;
+    right:-180px;bottom:-100px;
+    background:#008fc9;
+    animation-delay:2s
+}
+
+.nebula.three{
+    width:500px;height:330px;
+    left:42%;top:-150px;
+    background:#d52b91;
+    animation-delay:4s
+}
+
+@keyframes nebulaFloat{
+    from{transform:translate(0,0) scale(1)}
+    to{transform:translate(25px,-20px) scale(1.08)}
+}
+
+/* дополнительные космические кольца */
+.space-vignette{
+    position:absolute;
+    inset:-20%;
+    pointer-events:none;
+    z-index:20;
+    background:
+      radial-gradient(
+        ellipse at center,
+        transparent 40%,
+        rgba(0,0,20,.08) 65%,
+        rgba(0,0,10,.5) 100%
+      )
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    position:absolute;
+    z-index:500;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(94%,900px);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 18px;
+    border-radius:18px;
+    background:rgba(4,7,25,.72);
+    border:1px solid rgba(255,255,255,.16);
+    backdrop-filter:blur(12px);
+    box-shadow:
+      0 10px 40px rgba(0,0,0,.4),
+      0 0 35px rgba(80,100,255,.08)
+}
+
+.title{
+    font-size:20px;
+    font-weight:900
+}
+
+.subtitle{
+    margin-top:3px;
+    font-size:11px;
+    color:#aeb7d8
+}
+
+.counter{
+    white-space:nowrap;
+    padding:9px 14px;
+    border-radius:12px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.1);
+    font-size:13px;
+    font-weight:bold;
+    box-shadow:inset 0 0 15px rgba(255,255,255,.03)
+}
+
+/* =========================
+   SPACE / CAMERA
+========================= */
+
+#space{
+    position:absolute;
+    width:2400px;
+    height:1650px;
+    left:50%;
+    top:50%;
+
+    /*
+       ВАЖНО:
+       карта немного опущена вниз,
+       потому что сами планеты расположены
+       выше геометрического центра карты.
+    */
+    transform:
+        translate3d(-50%,calc(-50% + 125px),0)
+        scale(.65);
+
+    transform-origin:center center;
+    transition:
+        transform 1.5s cubic-bezier(.16,.8,.2,1);
+
+    will-change:transform
+}
+
+/* мягкое свечение вокруг всей карты */
+#space:before{
+    content:"";
+    position:absolute;
+    width:1500px;
+    height:900px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:
+      radial-gradient(
+        ellipse,
+        rgba(70,90,255,.07),
+        transparent 65%
+      );
+    pointer-events:none;
+    z-index:-1
+}
+
+/* =========================
+   ROUTE
+========================= */
+
+.route{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.23
+}
+
+.route svg{
+    width:100%;
+    height:100%
+}
+
+.route path{
+    fill:none;
+    stroke:#9eb2ff;
+    stroke-width:4;
+    stroke-dasharray:12 18;
+    animation:routeMove 4s linear infinite;
+    filter:
+      drop-shadow(0 0 5px rgba(130,160,255,.7))
+}
+
+@keyframes routeMove{
+    to{stroke-dashoffset:-60px}
+}
+
+/* дополнительная светящаяся линия */
+.route path:nth-child(2){
+    stroke:#fff;
+    stroke-width:1;
+    opacity:.35
+}
+
+/* =========================
+   WORLDS
+========================= */
+
+.world{
+    position:absolute;
+    width:280px;
+    height:280px;
+    transform:translate(-50%,-50%);
+    cursor:pointer;
+    z-index:10;
+    transition:
+      filter .4s,
+      transform .4s
+}
+
+.world:hover{
+    transform:translate(-50%,-50%) scale(1.08);
+    z-index:100
+}
+
+.world.disabled{
+    cursor:default
+}
+
+.world-glow{
+    position:absolute;
+    inset:-80px;
+    border-radius:50%;
+    filter:blur(15px);
+    pointer-events:none;
+    animation:worldPulse 3s ease-in-out infinite
+}
+
+@keyframes worldPulse{
+    0%,100%{
+        transform:scale(.88);
+        opacity:.4
+    }
+    50%{
+        transform:scale(1.08);
+        opacity:.8
+    }
+}
+
+.planet{
+    position:absolute;
+    width:230px;
+    height:230px;
+    left:25px;
+    top:25px;
+    border-radius:50%;
+    overflow:hidden;
+    border:2px solid rgba(255,255,255,.3);
+
+    box-shadow:
+      inset -35px -30px 60px rgba(0,0,0,.55),
+      inset 20px 15px 40px rgba(255,255,255,.15),
+      0 0 25px rgba(255,255,255,.08);
+
+    transition:
+      box-shadow .5s,
+      filter .5s
+}
+
+.planet:after{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    border-radius:50%;
+    border:5px solid rgba(255,255,255,.08);
+    pointer-events:none;
+    box-shadow:
+      inset 0 0 20px rgba(255,255,255,.12)
+}
+
+/* блестящая дуга на планетах */
+.planet:before{
+    content:"";
+    position:absolute;
+    width:130px;
+    height:35px;
+    left:22px;
+    top:18px;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+    filter:blur(8px);
+    transform:rotate(-25deg);
+    pointer-events:none;
+    z-index:30
+}
+
+.world-label{
+    position:absolute;
+    left:50%;
+    bottom:-48px;
+    transform:translateX(-50%);
+    min-width:190px;
+    padding:10px 16px;
+    text-align:center;
+    border-radius:14px;
+    background:rgba(4,7,24,.92);
+    border:1px solid rgba(255,255,255,.2);
+    backdrop-filter:blur(8px);
+    font-size:14px;
+    line-height:1.2;
+    font-weight:900;
+    white-space:nowrap;
+    box-shadow:
+      0 8px 25px rgba(0,0,0,.45),
+      0 0 20px rgba(100,120,255,.08);
+    transition:.4s
+}
+
+/* =========================
+   KING
+========================= */
+
+.king{
+    left:390px;
+    top:340px
+}
+
+.king .world-glow{
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,205,55,.95),
+        rgba(255,100,20,.3),
+        transparent 68%
+      )
+}
+
+.king .planet{
+    background:
+      radial-gradient(circle at 30% 20%,#fff0a0,transparent 15%),
+      linear-gradient(145deg,#ffdb69,#a85b1f 62%,#4b2117)
+}
+
+.ground{
+    position:absolute;
+    left:-10%;
+    bottom:-25px;
+    width:120%;
+    height:100px;
+    background:#71351e;
+    border-radius:50% 50% 0 0
+}
+
+.castle{
+    position:absolute;
+    left:50%;
+    bottom:45px;
+    transform:translateX(-50%);
+    width:130px;
+    height:85px;
+    background:#ead49a;
+    border:3px solid #80562e;
+    z-index:4
+}
+
+.castle-roof{
+    position:absolute;
+    left:50%;
+    top:-29px;
+    transform:translateX(-50%);
+    border-left:42px solid transparent;
+    border-right:42px solid transparent;
+    border-bottom:31px solid #ad2431
+}
+
+.tower{
+    position:absolute;
+    bottom:0;
+    width:30px;
+    height:105px;
+    background:#e7d19a;
+    border:3px solid #80562e
+}
+
+.tower.left{left:-23px}
+.tower.right{right:-23px}
+
+.tower:before{
+    content:"";
+    position:absolute;
+    top:-21px;
+    left:-5px;
+    border-left:18px solid transparent;
+    border-right:18px solid transparent;
+    border-bottom:21px solid #9f1827
+}
+
+.flag{
+    position:absolute;
+    left:12px;
+    top:-48px;
+    width:2px;
+    height:32px;
+    background:#3d2819
+}
+
+.flag:after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    border-top:7px solid transparent;
+    border-bottom:7px solid transparent;
+    border-left:23px solid #f7c943
+}
+
+.door{
+    position:absolute;
+    left:50%;
+    bottom:0;
+    transform:translateX(-50%);
+    width:26px;
+    height:43px;
+    background:#422316;
+    border-radius:14px 14px 0 0
+}
+
+.window{
+    position:absolute;
+    width:13px;
+    height:18px;
+    background:#72e8ff;
+    border:2px solid #50351f;
+    border-radius:7px 7px 2px 2px;
+    box-shadow:0 0 12px rgba(80,220,255,.7)
+}
+
+.w1{left:27px;top:27px}
+.w2{right:27px;top:27px}
+
+/* =========================
+   BUSINESSMAN
+========================= */
+
+.businessman{
+    left:890px;
+    top:180px
+}
+
+.businessman .world-glow{
+    background:
+      radial-gradient(
+        circle,
+        rgba(70,140,255,.95),
+        rgba(255,205,55,.25),
+        transparent 68%
+      )
+}
+
+.businessman .planet{
+    background:
+      radial-gradient(circle at 35% 23%,#fff0a2,transparent 13%),
+      linear-gradient(145deg,#1c2d68,#10132f 60%,#050711)
+}
+
+.gold-star{
+    position:absolute;
+    color:#ffd84c;
+    font-size:20px;
+    text-shadow:
+      0 0 12px #ffc400,
+      0 0 25px rgba(255,210,50,.5);
+    animation:goldStar 2.5s ease-in-out infinite
+}
+
+@keyframes goldStar{
+    50%{
+        transform:scale(1.3) rotate(15deg);
+        filter:brightness(1.5)
+    }
+}
+
+.gs1{left:28px;top:32px}
+.gs2{right:30px;top:70px}
+.gs3{left:48px;bottom:38px}
+.gs4{right:43px;bottom:45px}
+
+.observatory{
+    position:absolute;
+    left:50%;
+    bottom:38px;
+    transform:translateX(-50%);
+    width:120px;
+    height:92px;
+    background:#263760;
+    border:3px solid #7287bc;
+    border-radius:55% 55% 10px 10px;
+    z-index:4;
+    box-shadow:0 0 25px rgba(80,140,255,.3)
+}
+
+.dome{
+    position:absolute;
+    left:50%;
+    top:-45px;
+    transform:translateX(-50%);
+    width:102px;
+    height:70px;
+    border-radius:100px 100px 0 0;
+    background:#7186b8;
+    border:3px solid #c0d0ef
+}
+
+.telescope{
+    position:absolute;
+    left:50%;
+    top:-25px;
+    width:72px;
+    height:15px;
+    background:#e6c24c;
+    transform:translateX(-20%) rotate(-18deg);
+    border-radius:10px;
+    box-shadow:0 0 12px rgba(255,220,80,.6)
+}
+
+.coin{
+    position:absolute;
+    width:19px;
+    height:19px;
+    border-radius:50%;
+    background:#ffd64b;
+    border:2px solid #a56e00;
+    box-shadow:
+      0 0 10px rgba(255,210,40,.7),
+      0 0 20px rgba(255,190,30,.3);
+    animation:coinFloat 2s ease-in-out infinite alternate
+}
+
+@keyframes coinFloat{
+    to{transform:translateY(-8px) rotate(18deg)}
+}
+
+.coin.c1{left:18px;bottom:45px}
+.coin.c2{right:22px;bottom:29px}
+.coin.c3{left:30px;top:88px}
+
+/* =========================
+   CONCEITED
+========================= */
+
+.conceited{
+    left:1510px;
+    top:390px
+}
+
+.conceited .world-glow{
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,75,205,.95),
+        rgba(130,55,255,.5),
+        transparent 68%
+      )
+}
+
+.conceited .planet{
+    background:
+      radial-gradient(circle at 30% 24%,#ffb8ee,transparent 15%),
+      linear-gradient(145deg,#ef5db8,#7135a2 60%,#291b65)
+}
+
+.palace{
+    position:absolute;
+    left:50%;
+    bottom:38px;
+    transform:translateX(-50%);
+    width:130px;
+    height:95px;
+    background:#f6b7e5;
+    border:3px solid #8c3f86;
+    z-index:4;
+    box-shadow:0 0 20px rgba(255,100,230,.35)
+}
+
+.palace-roof{
+    position:absolute;
+    top:-35px;
+    left:50%;
+    transform:translateX(-50%);
+    border-left:70px solid transparent;
+    border-right:70px solid transparent;
+    border-bottom:40px solid #d62b94
+}
+
+.mirror{
+    position:absolute;
+    width:35px;
+    height:48px;
+    border:5px solid #e5d1ff;
+    background:linear-gradient(135deg,#b8f7ff,#6959db);
+    border-radius:50%;
+    box-shadow:
+      0 0 14px #b8a5ff,
+      0 0 28px rgba(180,120,255,.35);
+    animation:mirrorShine 3s ease-in-out infinite
+}
+
+@keyframes mirrorShine{
+    50%{filter:brightness(1.4)}
+}
+
+.m1{left:18px;top:53px}
+.m2{right:18px;top:45px}
+
+.spotlight{
+    position:absolute;
+    width:5px;
+    height:125px;
+    left:50%;
+    bottom:30px;
+    background:linear-gradient(
+      to top,
+      transparent,
+      rgba(255,255,255,.7)
+    );
+    transform-origin:bottom;
+    transform:rotate(24deg);
+    opacity:.45;
+    filter:blur(1px);
+    animation:spotMove 4s ease-in-out infinite alternate
+}
+
+@keyframes spotMove{
+    to{transform:rotate(-18deg)}
+}
+
+/* =========================
+   LAMPLIGHTER
+========================= */
+
+.lamplighter{
+    left:590px;
+    top:850px
+}
+
+.lamplighter .world-glow{
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,225,80,.95),
+        rgba(40,160,255,.4),
+        transparent 68%
+      )
+}
+
+.lamplighter .planet{
+    background:
+      linear-gradient(150deg,#3c76ba,#17335d 65%,#0b142d)
+}
+
+.town-ground{
+    position:absolute;
+    bottom:-15px;
+    left:-10%;
+    width:120%;
+    height:95px;
+    background:#172b4d;
+    border-top:3px solid #496792
+}
+
+.house{
+    position:absolute;
+    bottom:55px;
+    width:45px;
+    height:50px;
+    background:#687e9e;
+    border:2px solid #a9bbd4
+}
+
+.house:before{
+    content:"";
+    position:absolute;
+    top:-25px;
+    left:-6px;
+    border-left:28px solid transparent;
+    border-right:28px solid transparent;
+    border-bottom:28px solid #324c73
+}
+
+.house.h1{left:25px}
+.house.h2{right:25px}
+
+.lamp{
+    position:absolute;
+    width:4px;
+    height:65px;
+    bottom:40px;
+    background:#151c2b
+}
+
+.lamp:before{
+    content:"";
+    position:absolute;
+    width:18px;
+    height:18px;
+    left:-7px;
+    top:-8px;
+    border-radius:50%;
+    background:#ffe87b;
+    box-shadow:
+      0 0 8px #ffe87b,
+      0 0 20px rgba(255,220,80,.8),
+      0 0 35px rgba(255,220,80,.4),
+      0 0 60px rgba(255,210,70,.2);
+    animation:lampGlow 1.8s ease-in-out infinite alternate
+}
+
+@keyframes lampGlow{
+    to{
+        transform:scale(1.25);
+        filter:brightness(1.3)
+    }
+}
+
+.lamp.l1{left:75px}
+.lamp.l2{left:140px}
+.lamp.l3{right:70px}
+
+/* =========================
+   DRUNKARD
+========================= */
+
+.drunkard{
+    left:1370px;
+    top:1040px
+}
+
+.drunkard .world-glow{
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,70,110,.9),
+        rgba(120,35,150,.5),
+        transparent 68%
+      )
+}
+
+.drunkard .planet{
+    background:
+      radial-gradient(circle at 60% 20%,#683e5b,transparent 15%),
+      linear-gradient(150deg,#291d38,#100d1e 70%)
+}
+
+.tavern{
+    position:absolute;
+    left:50%;
+    bottom:40px;
+    transform:translateX(-50%);
+    width:125px;
+    height:90px;
+    background:#57322b;
+    border:3px solid #25151a;
+    z-index:4
+}
+
+.tavern-roof{
+    position:absolute;
+    top:-35px;
+    left:-10px;
+    width:145px;
+    height:38px;
+    background:#25141a;
+    clip-path:polygon(
+      0 100%,10% 0,90% 0,100% 100%
+    )
+}
+
+.tavern-sign{
+    position:absolute;
+    left:50%;
+    top:-8px;
+    transform:translateX(-50%);
+    padding:4px 10px;
+    border-radius:5px;
+    background:#d99b45;
+    color:#301b12;
+    font-size:10px;
+    font-weight:bold
+}
+
+.barrel{
+    position:absolute;
+    width:28px;
+    height:36px;
+    border-radius:8px;
+    background:#743f27;
+    border:3px solid #321b15
+}
+
+.barrel:before,
+.barrel:after{
+    content:"";
+    position:absolute;
+    left:3px;
+    right:3px;
+    height:4px;
+    background:#c58a43
+}
+
+.barrel:before{top:8px}
+.barrel:after{bottom:8px}
+
+.barrel.b1{left:25px;bottom:45px}
+.barrel.b2{right:25px;bottom:38px}
+
+.smoke{
+    position:absolute;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:rgba(210,210,230,.13);
+    filter:blur(3px);
+    animation:smokeMove 3s ease-in-out infinite
+}
+
+.sm1{right:50px;top:30px}
+.sm2{right:32px;top:12px;animation-delay:.8s}
+.sm3{right:65px;top:4px;animation-delay:1.4s}
+
+@keyframes smokeMove{
+    50%{
+        transform:
+          translateY(-8px)
+          translateX(4px)
+          scale(1.15)
+    }
+}
+
+/* =========================
+   GEOGRAPHER
+========================= */
+
+.geographer{
+    left:2050px;
+    top:690px
+}
+
+.geographer .world-glow{
+    background:
+      radial-gradient(
+        circle,
+        rgba(45,255,215,.9),
+        rgba(40,130,255,.35),
+        transparent 68%
+      )
+}
+
+.geographer .planet{
+    background:
+      linear-gradient(150deg,#55a6a1,#255e68 55%,#102e3c)
+}
+
+.library{
+    position:absolute;
+    left:50%;
+    bottom:35px;
+    transform:translateX(-50%);
+    width:140px;
+    height:105px;
+    background:#c69b65;
+    border:4px solid #604126;
+    z-index:4
+}
+
+.library-roof{
+    position:absolute;
+    top:-40px;
+    left:-12px;
+    width:155px;
+    height:42px;
+    background:#6d4028;
+    clip-path:polygon(
+      0 100%,50% 0,100% 100%
+    )
+}
+
+.column{
+    position:absolute;
+    bottom:0;
+    width:12px;
+    height:80px;
+    background:#ead0a2;
+    border:2px solid #765537
+}
+
+.column.c1{left:18px}
+.column.c2{left:50px}
+.column.c3{right:50px}
+.column.c4{right:18px}
+
+.library-door{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:30px;
+    height:58px;
+    border-radius:16px 16px 0 0;
+    background:#422b20
+}
+
+.book{
+    position:absolute;
+    width:24px;
+    height:9px;
+    border-radius:2px;
+    background:#efc85d
+}
+
+.book.b1{left:15px;top:35px}
+.book.b2{left:15px;top:48px;background:#db6b6b}
+.book.b3{right:15px;top:40px;background:#6cc8df}
+.book.b4{right:15px;top:53px;background:#b98ae8}
+
+.mountain{
+    position:absolute;
+    bottom:30px;
+    width:0;
+    height:0;
+    border-left:40px solid transparent;
+    border-right:40px solid transparent;
+    border-bottom:70px solid #244d52
+}
+
+.m1g{left:15px}
+.m2g{
+    right:5px;
+    transform:scale(.8)
+}
+
+.snow{
+    position:absolute;
+    left:-13px;
+    top:18px;
+    border-left:13px solid transparent;
+    border-right:13px solid transparent;
+    border-bottom:22px solid #d9f4ef
+}
+
+/* =========================
+   PRINCE
+========================= */
+
+#prince{
+    position:absolute;
+    width:100px;
+    height:165px;
+    z-index:200;
+    pointer-events:none;
+    transform:translate(-50%,-50%);
+    will-change:left,top,transform;
+    filter:
+      drop-shadow(0 0 15px rgba(255,220,90,.5))
+      drop-shadow(0 0 30px rgba(255,180,50,.12))
+}
+
+#prince.flying{
+    animation:flightBody .38s ease-in-out infinite alternate
+}
+
+@keyframes flightBody{
+    from{
+        transform:
+          translate(-50%,-50%)
+          rotate(-12deg)
+          translateY(4px)
+    }
+    to{
+        transform:
+          translate(-50%,-50%)
+          rotate(12deg)
+          translateY(-9px)
+    }
+}
+
+.prince-star{
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+    font-size:24px;
+    color:#ffe36e;
+    text-shadow:
+      0 0 12px #ffd83d,
+      0 0 25px rgba(255,210,50,.5);
+    animation:starFloat 1.2s ease-in-out infinite
+}
+
+@keyframes starFloat{
+    50%{
+        transform:
+          translateX(-50%)
+          translateY(-7px)
+          rotate(12deg)
+    }
+}
+
+.hair{
+    position:absolute;
+    width:54px;
+    height:47px;
+    left:23px;
+    top:27px;
+    background:#f0bd52;
+    border-radius:48% 55% 35% 45%;
+    z-index:5
+}
+
+.hair:before,
+.hair:after{
+    content:"";
+    position:absolute;
+    background:#f0bd52;
+    border-radius:50%
+}
+
+.hair:before{
+    width:20px;
+    height:30px;
+    left:-8px;
+    top:9px
+}
+
+.hair:after{
+    width:21px;
+    height:32px;
+    right:-7px;
+    top:4px
+}
+
+.face{
+    position:absolute;
+    left:31px;
+    top:38px;
+    width:39px;
+    height:47px;
+    border-radius:45% 45% 48% 48%;
+    background:#f5c89b;
+    z-index:6;
+    border:1px solid rgba(80,40,20,.25)
+}
+
+.eye{
+    position:absolute;
+    top:17px;
+    width:5px;
+    height:7px;
+    border-radius:50%;
+    background:#34261f
+}
+
+.eye.left{left:9px}
+.eye.right{right:9px}
+
+.nose{
+    position:absolute;
+    left:18px;
+    top:25px;
+    width:5px;
+    height:4px;
+    border-radius:50%;
+    background:#d29472
+}
+
+.smile{
+    position:absolute;
+    left:13px;
+    bottom:9px;
+    width:13px;
+    height:6px;
+    border-bottom:2px solid #8e4d49;
+    border-radius:50%
+}
+
+.neck{
+    position:absolute;
+    left:44px;
+    top:81px;
+    width:14px;
+    height:14px;
+    background:#edb989;
+    z-index:4
+}
+
+.cape{
+    position:absolute;
+    left:24px;
+    top:87px;
+    width:54px;
+    height:56px;
+    background:#e7b83e;
+    clip-path:polygon(
+      25% 0,100% 13%,82% 100%,0 80%
+    );
+    z-index:3;
+    transform-origin:top center
+}
+
+.body{
+    position:absolute;
+    left:31px;
+    top:90px;
+    width:40px;
+    height:45px;
+    background:#4774b9;
+    border-radius:13px 13px 7px 7px;
+    z-index:4;
+    border:2px solid #294a82
+}
+
+.scarf{
+    position:absolute;
+    left:38px;
+    top:84px;
+    width:27px;
+    height:10px;
+    background:#e74f58;
+    z-index:8;
+    transform:rotate(-4deg);
+    transform-origin:left center
+}
+
+.scarf:after{
+    content:"";
+    position:absolute;
+    right:-3px;
+    top:7px;
+    width:13px;
+    height:27px;
+    background:#e74f58;
+    transform:rotate(12deg);
+    transform-origin:top center
+}
+
+.arm{
+    position:absolute;
+    width:12px;
+    height:42px;
+    background:#4774b9;
+    border-radius:10px;
+    top:96px;
+    z-index:2;
+    transform-origin:top center
+}
+
+.arm.left{
+    left:21px;
+    transform:rotate(15deg)
+}
+
+.arm.right{
+    right:21px;
+    transform:rotate(-15deg)
+}
+
+.hand{
+    position:absolute;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#f1bd8d;
+    top:131px;
+    z-index:6
+}
+
+.hand.left{left:18px}
+.hand.right{right:18px}
+
+.leg{
+    position:absolute;
+    width:13px;
+    height:31px;
+    background:#3c5786;
+    top:130px;
+    z-index:1;
+    transform-origin:top center
+}
+
+.leg.left{left:35px}
+.leg.right{right:35px}
+
+.boot{
+    position:absolute;
+    width:19px;
+    height:9px;
+    background:#28262d;
+    border-radius:8px;
+    top:153px
+}
+
+.boot.left{left:29px}
+.boot.right{right:29px}
+
+#prince.flying .arm.left{
+    animation:armL .35s ease-in-out infinite alternate
+}
+
+#prince.flying .arm.right{
+    animation:armR .35s ease-in-out infinite alternate
+}
+
+#prince.flying .leg.left{
+    animation:legL .35s ease-in-out infinite alternate
+}
+
+#prince.flying .leg.right{
+    animation:legR .35s ease-in-out infinite alternate
+}
+
+#prince.flying .scarf{
+    animation:scarfFly .3s ease-in-out infinite alternate
+}
+
+#prince.flying .cape{
+    animation:capeFly .35s ease-in-out infinite alternate
+}
+
+@keyframes armL{
+    to{transform:rotate(-35deg) translateY(-5px)}
+}
+
+@keyframes armR{
+    to{transform:rotate(35deg) translateY(-5px)}
+}
+
+@keyframes legL{
+    to{transform:rotate(18deg)}
+}
+
+@keyframes legR{
+    to{transform:rotate(-18deg)}
+}
+
+@keyframes scarfFly{
+    to{
+        transform:
+          rotate(-18deg)
+          translateX(-10px)
+          scaleX(1.3)
+    }
+}
+
+@keyframes capeFly{
+    to{
+        transform:
+          skewX(-12deg)
+          rotate(-5deg)
+    }
+}
+
+/* =========================
+   EXTRA SPACE DUST
+========================= */
+
+.space-dust{
+    position:absolute;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#fff;
+    pointer-events:none;
+    z-index:5;
+    opacity:.55;
+    box-shadow:
+      0 0 8px rgba(180,210,255,.9);
+    animation:dustFloat 5s ease-in-out infinite alternate
+}
+
+@keyframes dustFloat{
+    from{
+        transform:translate(0,0) scale(.7);
+        opacity:.25
+    }
+    to{
+        transform:translate(25px,-20px) scale(1.3);
+        opacity:.85
+    }
+}
+
+/* =========================
+   VISITED
+========================= */
+
+.world.visited .planet{
+    box-shadow:
+      inset -35px -30px 60px rgba(0,0,0,.5),
+      inset 20px 15px 40px rgba(255,255,255,.15),
+      0 0 55px rgba(100,255,180,.85),
+      0 0 100px rgba(100,255,180,.25)
+}
+
+.world.visited .world-label{
+    border-color:rgba(100,255,180,.65);
+    color:#dffff0;
+    box-shadow:
+      0 0 20px rgba(80,255,170,.15),
+      0 8px 25px rgba(0,0,0,.45)
+}
+
+.world.visited .world-label:before{
+    content:"✓ ";
+    color:#67ffb0;
+    font-size:18px
+}
+
+.world.selected .planet{
+    animation:selectedPlanet 1.2s ease-in-out infinite alternate
+}
+
+@keyframes selectedPlanet{
+    from{
+        filter:brightness(1)
+    }
+    to{
+        filter:
+          brightness(1.3)
+          saturate(1.2)
+    }
+}
+
+/* =========================
+   TRAIL
+========================= */
+
+.flight-trail{
+    position:absolute;
+    width:95px;
+    height:7px;
+    border-radius:50%;
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,230,100,.9),
+        #fff,
+        transparent
+      );
+    pointer-events:none;
+    z-index:150;
+    transform-origin:right center;
+    filter:
+      blur(.4px)
+      drop-shadow(0 0 8px rgba(255,220,80,.8));
+    animation:trailFade .75s ease-out forwards
+}
+
+@keyframes trailFade{
+    from{
+        opacity:.95;
+        transform:scaleX(1)
+    }
+    to{
+        opacity:0;
+        transform:scaleX(.05)
+    }
+}
+
+.particle{
+    position:fixed;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#fff;
+    pointer-events:none;
+    z-index:450;
+    box-shadow:
+      0 0 8px #ffe36e,
+      0 0 18px rgba(255,210,80,.6);
+    animation:particleFly .9s ease-out forwards
+}
+
+@keyframes particleFly{
+    to{
+        transform:
+          translate(var(--dx),var(--dy))
+          scale(0);
+        opacity:0
+    }
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:600;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.62);
+    backdrop-filter:blur(8px)
+}
+
+.modal.active{
+    display:flex
+}
+
+.modal-card{
+    width:min(680px,94vw);
+    max-height:90vh;
+    overflow:auto;
+    padding:30px;
+    border-radius:26px;
+    background:
+      radial-gradient(
+        circle at 20% 0%,
+        rgba(110,100,255,.2),
+        transparent 35%
+      ),
+      #080c22;
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:
+      0 25px 80px rgba(0,0,0,.7),
+      0 0 50px rgba(80,100,255,.1);
+    animation:modalIn .35s ease
+}
+
+@keyframes modalIn{
+    from{
+        opacity:0;
+        transform:translateY(25px) scale(.96)
+    }
+    to{
+        opacity:1;
+        transform:none
+    }
+}
+
+.modal-icon{
+    font-size:48px;
+    margin-bottom:10px;
+    filter:
+      drop-shadow(0 0 15px rgba(255,220,100,.35))
+}
+
+.modal-title{
+    font-size:27px;
+    font-weight:900;
+    margin-bottom:18px
+}
+
+.question{
+    padding:20px;
+    border-radius:18px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    color:#e9edff;
+    font-size:18px;
+    line-height:1.55
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:24px
+}
+
+.btn{
+    border:0;
+    border-radius:14px;
+    padding:13px 20px;
+    color:#fff;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    background:
+      linear-gradient(
+        135deg,
+        #536dff,
+        #7b4dff
+      );
+    box-shadow:
+      0 8px 25px rgba(75,80,255,.3),
+      0 0 25px rgba(100,80,255,.15);
+    transition:.2s
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.12)
+}
+
+/* =========================
+   INTRO
+========================= */
+
+.fullscreen{
+    position:fixed;
+    inset:0;
+    z-index:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+    background:
+      radial-gradient(
+        circle at 50% 40%,
+        rgba(80,60,190,.28),
+        transparent 40%
+      ),
+      #02030b
+}
+
+.intro-card{
+    width:min(700px,94vw);
+    text-align:center;
+    padding:40px 30px;
+    border-radius:30px;
+    background:rgba(7,10,30,.82);
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:
+      0 30px 100px rgba(0,0,0,.6),
+      0 0 50px rgba(80,90,255,.1)
+}
+
+.intro-prince{
+    font-size:80px;
+    margin-bottom:10px;
+    animation:float 3s ease-in-out infinite
+}
+
+@keyframes float{
+    50%{
+        transform:
+          translateY(-10px)
+          rotate(4deg)
+    }
+}
+
+.intro-card h1{
+    font-size:38px;
+    margin-bottom:15px
+}
+
+.intro-card p{
+    color:#aeb7d8;
+    line-height:1.6;
+    max-width:560px;
+    margin:0 auto 25px
+}
+
+.instructions{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:25px
+}
+
+.instruction{
+    padding:9px 13px;
+    border-radius:12px;
+    background:rgba(255,255,255,.06);
+    color:#dce1fa;
+    font-size:12px;
+    border:1px solid rgba(255,255,255,.05)
+}
+
+#finish{
+    display:none
+}
+
+/* =========================
+   FIREWORKS
+========================= */
+
+.firework{
+    position:fixed;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#fff;
+    pointer-events:none;
+    z-index:800;
+    box-shadow:
+      0 0 12px #fff,
+      0 0 25px rgba(120,160,255,.8);
+    animation:firework 1.2s ease-out forwards
+}
+
+@keyframes firework{
+    to{
+        transform:
+          translate(var(--x),var(--y));
+        opacity:0
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    .header{
+        top:8px;
+        padding:9px 11px;
+        border-radius:14px
+    }
+
+    .title{
+        font-size:15px
+    }
+
+    .subtitle{
+        display:none
+    }
+
+    .counter{
+        font-size:11px;
+        padding:7px 9px
+    }
+
+    .world-label{
+        font-size:12px;
+        min-width:165px;
+        padding:8px 10px
+    }
+
+    .modal-card{
+        padding:23px
+    }
+
+    .modal-title{
+        font-size:22px
+    }
+
+    .question{
+        font-size:16px
+    }
+
+    .intro-card h1{
+        font-size:28px
+    }
+
+    .intro-prince{
+        font-size:60px
+    }
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    *,*:before,*:after{
+        animation-duration:.001ms!important;
+        transition-duration:.001ms!important
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div id="stars"></div>
+<div id="stars2"></div>
+
+<div class="nebula one"></div>
+<div class="nebula two"></div>
+<div class="nebula three"></div>
+
+<div class="space-vignette"></div>
+
+<div class="header">
+
+    <div>
+        <div class="title">🌟 Маленький принц</div>
+        <div class="subtitle">Путешествие по мирам</div>
+    </div>
+
+    <div class="counter">
+        Исследовано:
+        <span id="visitedCount">0</span> / 6
+    </div>
+
+</div>
+
+<div id="space">
+
+<div class="route">
+
+<svg viewBox="0 0 2400 1650" preserveAspectRatio="none">
+
+<path d="
+M390 340
+C620 120 720 250 890 180
+C1120 90 1270 300 1510 390
+C1750 500 1830 610 2050 690
+C1840 850 1650 920 1370 1040
+C1050 1130 850 1000 590 850
+"/>
+
+</svg>
+
+</div>
+
+<!-- KING -->
+
+<div class="world king"
+     data-id="king"
+     data-x="16.25"
+     data-y="20.6">
+
+<div class="world-glow"></div>
+
+<div class="planet">
+
+<div class="ground"></div>
+
+<div class="castle">
+
+<div class="castle-roof"></div>
+
+<div class="tower left">
+<div class="flag"></div>
+</div>
+
+<div class="tower right">
+<div class="flag"></div>
+</div>
+
+<div class="door"></div>
+
+<div class="window w1"></div>
+<div class="window w2"></div>
+
+</div>
+
+</div>
+
+<div class="world-label">
+Планета Короля
+</div>
+
+</div>
+
+
+<!-- BUSINESSMAN -->
+
+<div class="world businessman"
+     data-id="businessman"
+     data-x="37.1"
+     data-y="10.9">
+
+<div class="world-glow"></div>
+
+<div class="planet">
+
+<div class="gold-star gs1">★</div>
+<div class="gold-star gs2">★</div>
+<div class="gold-star gs3">★</div>
+<div class="gold-star gs4">★</div>
+
+<div class="observatory">
+
+<div class="dome"></div>
+
+<div class="telescope"></div>
+
+</div>
+
+<div class="coin c1"></div>
+<div class="coin c2"></div>
+<div class="coin c3"></div>
+
+</div>
+
+<div class="world-label">
+Планета Дельца
+</div>
+
+</div>
+
+
+<!-- CONCEITED -->
+
+<div class="world conceited"
+     data-id="conceited"
+     data-x="62.9"
+     data-y="23.6">
+
+<div class="world-glow"></div>
+
+<div class="planet">
+
+<div class="spotlight"></div>
+
+<div class="palace">
+<div class="palace-roof"></div>
+</div>
+
+<div class="mirror m1"></div>
+<div class="mirror m2"></div>
+
+</div>
+
+<div class="world-label">
+Тәкәппар адамның планетасы
+</div>
+
+</div>
+
+
+<!-- LAMPLIGHTER -->
+
+<div class="world lamplighter"
+     data-id="lamplighter"
+     data-x="24.6"
+     data-y="51.5">
+
+<div class="world-glow"></div>
+
+<div class="planet">
+
+<div class="town-ground"></div>
+
+<div class="house h1"></div>
+<div class="house h2"></div>
+
+<div class="lamp l1"></div>
+<div class="lamp l2"></div>
+<div class="lamp l3"></div>
+
+</div>
+
+<div class="world-label">
+Шамшырақшының планетасы
+</div>
+
+</div>
+
+
+<!-- DRUNKARD -->
+
+<div class="world drunkard"
+     data-id="drunkard"
+     data-x="57.1"
+     data-y="63">
+
+<div class="world-glow"></div>
+
+<div class="planet">
+
+<div class="tavern">
+
+<div class="tavern-roof"></div>
+
+<div class="tavern-sign">
+TAVERN
+</div>
+
+</div>
+
+<div class="barrel b1"></div>
+<div class="barrel b2"></div>
+
+<div class="smoke sm1"></div>
+<div class="smoke sm2"></div>
+<div class="smoke sm3"></div>
+
+</div>
+
+<div class="world-label">
+The Planet of the Drunkard
+</div>
+
+</div>
+
+
+<!-- GEOGRAPHER -->
+
+<div class="world geographer"
+     data-id="geographer"
+     data-x="85.4"
+     data-y="41.8">
+
+<div class="world-glow"></div>
+
+<div class="planet">
+
+<div class="mountain m1g">
+<div class="snow"></div>
+</div>
+
+<div class="mountain m2g">
+<div class="snow"></div>
+</div>
+
+<div class="library">
+
+<div class="library-roof"></div>
+
+<div class="column c1"></div>
+<div class="column c2"></div>
+<div class="column c3"></div>
+<div class="column c4"></div>
+
+<div class="library-door"></div>
+
+<div class="book b1"></div>
+<div class="book b2"></div>
+<div class="book b3"></div>
+<div class="book b4"></div>
+
+</div>
+
+</div>
+
+<div class="world-label">
+The Planet of the Geographer
+</div>
+
+</div>
+
+
+<!-- PRINCE -->
+
+<div id="prince">
+
+<div class="prince-star">
+✦
+</div>
+
+<div class="hair"></div>
+
+<div class="face">
+
+<div class="eye left"></div>
+<div class="eye right"></div>
+
+<div class="nose"></div>
+<div class="smile"></div>
+
+</div>
+
+<div class="neck"></div>
+
+<div class="cape"></div>
+
+<div class="body"></div>
+
+<div class="scarf"></div>
+
+<div class="arm left"></div>
+<div class="arm right"></div>
+
+<div class="hand left"></div>
+<div class="hand right"></div>
+
+<div class="leg left"></div>
+<div class="leg right"></div>
+
+<div class="boot left"></div>
+<div class="boot right"></div>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- INTRO -->
+
+<div id="intro" class="fullscreen">
+
+<div class="intro-card">
+
+<div class="intro-prince">
+👑
+</div>
+
+<h1>
+Маленький принц
+</h1>
+
+<p>
+Путешествие по далёким мирам.
+Посети шесть необычных планет,
+познакомься с их жителями
+и ответь на вопросы по произведению.
+</p>
+
+<div class="instructions">
+
+<div class="instruction">
+🪐 Выбирай планету
+</div>
+
+<div class="instruction">
+🚀 Отправляйся в путешествие
+</div>
+
+<div class="instruction">
+💭 Отвечай на вопрос
+</div>
+
+<div class="instruction">
+⭐ Исследуй все 6 миров
+</div>
+
+</div>
+
+<button class="btn" id="startBtn">
+Начать путешествие 🚀
+</button>
+
+</div>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div id="worldInfo" class="modal">
+
+<div class="modal-card">
+
+<div class="modal-icon" id="modalIcon">
+🪐
+</div>
+
+<div class="modal-title" id="modalTitle">
+Планета
+</div>
+
+<div class="question" id="modalQuestion">
+Вопрос
+</div>
+
+<div class="modal-actions">
+
+<button class="btn" id="continueBtn">
+Продолжить путешествие →
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- FINISH -->
+
+<div id="finish" class="fullscreen">
+
+<div class="intro-card">
+
+<div class="intro-prince">
+🌟
+</div>
+
+<h1>
+Путешествие завершено!
+</h1>
+
+<p>
+Маленький принц посетил все шесть миров.
+Теперь ты знаешь больше о героях,
+которых он встретил во время своего путешествия.
+</p>
+
+<button class="btn" id="restartBtn">
+Начать сначала 🔄
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const worlds={
+
+king:{
+title:"Планета Короля",
+icon:"👑",
+question:"Чего больше всего жаждет Король на своей планете и почему он считает всех вокруг своими подданными?"
+},
+
+businessman:{
+title:"Планета Дельца",
+icon:"💰",
+question:"Зачем Делец постоянно считает звезды на своей небесной сфере, и можно ли владеть тем, что принадлежит вселенной?"
+},
+
+conceited:{
+title:"Тәкәппар адамның планетасы",
+icon:"🪞",
+question:"Тәкәппар адам айналасындағылардан нені естігісі келеді, сонда ол өзгенің пікіріне тәуелді ме?"
+},
+
+lamplighter:{
+title:"Шамшырақшының планетасы",
+icon:"💡",
+question:"Неліктен Кішкентай ханзада Шамшырақшының жұмысын басқаларға қарағанда ең пайдалы деп санады?"
+},
+
+drunkard:{
+title:"The Planet of the Drunkard",
+icon:"🍷",
+question:"Why did the Drunkard spend his time drinking every day, and what vicious cycle was he trapped in?"
+},
+
+geographer:{
+title:"The Planet of the Geographer",
+icon:"🗺️",
+question:"Why does the Geographer refuse to explore oceans and mountains himself, even though he maps the entire world?"
+}
+
+};
+
+
+const space=document.getElementById("space");
+const prince=document.getElementById("prince");
+
+const intro=document.getElementById("intro");
+const finish=document.getElementById("finish");
+
+const worldInfo=document.getElementById("worldInfo");
+
+const modalIcon=document.getElementById("modalIcon");
+const modalTitle=document.getElementById("modalTitle");
+const modalQuestion=document.getElementById("modalQuestion");
+
+const visitedCount=document.getElementById("visitedCount");
+
+
+let currentWorld=null;
+let previousWorld=null;
+let flying=false;
+
+let visited=new Set();
+
+
+/* =========================
+   STARS
+========================= */
+
+function createStars(container,count){
+
+    const f=document.createDocumentFragment();
+
+    for(let i=0;i<count;i++){
+
+        const s=document.createElement("div");
+
+        s.className="star";
+
+        if(Math.random()<.08){
+            s.classList.add("big");
+        }
+
+        s.style.left=
+            Math.random()*100+"%";
+
+        s.style.top=
+            Math.random()*100+"%";
+
+        s.style.animationDelay=
+            (-Math.random()*4)+"s";
+
+        f.appendChild(s);
+    }
+
+    container.appendChild(f);
+}
+
+
+createStars(
+    document.getElementById("stars"),
+    120
+);
+
+createStars(
+    document.getElementById("stars2"),
+    45
+);
+
+
+/* =========================
+   EXTRA SPACE DUST
+========================= */
+
+function createSpaceDust(){
+
+    for(let i=0;i<75;i++){
+
+        const dust=document.createElement("div");
+
+        dust.className="space-dust";
+
+        dust.style.left=
+            (Math.random()*2350+25)+"px";
+
+        dust.style.top=
+            (Math.random()*1580+25)+"px";
+
+        const size=
+            2+Math.random()*4;
+
+        dust.style.width=size+"px";
+        dust.style.height=size+"px";
+
+        dust.style.animationDelay=
+            (-Math.random()*6)+"s";
+
+        dust.style.animationDuration=
+            (4+Math.random()*5)+"s";
+
+        space.appendChild(dust);
+    }
+}
+
+createSpaceDust();
+
+
+/* =========================
+   CAMERA
+========================= */
+
+function getOverviewScale(){
+
+    const w=window.innerWidth;
+    const h=window.innerHeight;
+
+    let scale=Math.min(
+        (w-80)/2400,
+        (h-160)/1650
+    );
+
+    scale*=1.16;
+
+    return Math.max(
+        .47,
+        Math.min(.78,scale)
+    );
+}
+
+
+function showOverview(){
+
+    const scale=getOverviewScale();
+
+    /*
+       Главная коррекция камеры.
+
+       Планеты физически расположены
+       выше центра карты, поэтому карту
+       опускаем примерно на 125px.
+
+       Теперь свободного пространства
+       снизу значительно меньше.
+    */
+
+    space.style.transform=
+        `translate3d(
+            -50%,
+            calc(-50% + 125px),
+            0
+        ) scale(${scale})`;
+}
+
+
+/* =========================
+   FOCUS CAMERA
+========================= */
+
+function focusWorld(world){
+
+    const x=
+        parseFloat(world.dataset.x);
+
+    const y=
+        parseFloat(world.dataset.y);
+
+    const targetX=
+        (2400*x/100)-1200;
+
+    const targetY=
+        (1650*y/100)-825;
+
+
+    /*
+       Здесь камера центрирует
+       выбранную планету.
+
+       Положительная коррекция
+       опускает планету ниже.
+    */
+
+    let adjustedY=
+        targetY-70;
+
+
+    /*
+       Делец находится в верхней части карты.
+       Поэтому опускаем камеру сильнее.
+    */
+
+    if(world.classList.contains("businessman")){
+
+        adjustedY-=120;
+    }
+
+
+    space.style.transform=
+        `translate3d(
+            calc(-50% - ${targetX}px),
+            calc(-50% - ${adjustedY}px),
+            0
+        ) scale(.96)`;
+}
+
+
+/* =========================
+   POSITION
+========================= */
+
+function getWorldPosition(world){
+
+    return{
+
+        x:
+            2400*
+            parseFloat(world.dataset.x)/
+            100,
+
+        y:
+            1650*
+            parseFloat(world.dataset.y)/
+            100
+
+    };
+}
+
+
+function placePrince(world){
+
+    prince.style.left=
+        world.dataset.x+"%";
+
+    prince.style.top=
+        world.dataset.y+"%";
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function createFlightParticle(){
+
+    const rect=
+        prince.getBoundingClientRect();
+
+    const p=
+        document.createElement("div");
+
+    p.className="particle";
+
+    p.style.left=
+        rect.left+
+        rect.width*.45+
+        "px";
+
+    p.style.top=
+        rect.top+
+        rect.height*.48+
+        "px";
+
+
+    const angle=
+        Math.random()*
+        Math.PI*2;
+
+    const distance=
+        25+
+        Math.random()*80;
+
+
+    p.style.setProperty(
+        "--dx",
+        Math.cos(angle)*
+        distance+
+        "px"
+    );
+
+    p.style.setProperty(
+        "--dy",
+        Math.sin(angle)*
+        distance+
+        "px"
+    );
+
+
+    document.body.appendChild(p);
+
+    setTimeout(
+        ()=>p.remove(),
+        950
+    );
+}
+
+
+/* =========================
+   TRAIL
+========================= */
+
+function createFlightTrail(){
+
+    const rect=
+        prince.getBoundingClientRect();
+
+    const trail=
+        document.createElement("div");
+
+    trail.className=
+        "flight-trail";
+
+
+    trail.style.left=
+        rect.left+
+        rect.width*.15+
+        "px";
+
+    trail.style.top=
+        rect.top+
+        rect.height*.47+
+        "px";
+
+
+    trail.style.transform=
+        "rotate(180deg)";
+
+
+    document.body.appendChild(trail);
+
+    setTimeout(
+        ()=>trail.remove(),
+        750
+    );
+}
+
+
+/* =========================
+   ARRIVAL PARTICLES
+========================= */
+
+function createArrivalBurst(world){
+
+    const rect=
+        world.getBoundingClientRect();
+
+
+    for(let i=0;i<30;i++){
+
+        const p=
+            document.createElement("div");
+
+        p.className=
+            "particle";
+
+
+        p.style.left=
+            rect.left+
+            rect.width/2+
+            "px";
+
+        p.style.top=
+            rect.top+
+            rect.height/2+
+            "px";
+
+
+        const angle=
+            Math.random()*
+            Math.PI*2;
+
+        const distance=
+            50+
+            Math.random()*150;
+
+
+        p.style.setProperty(
+            "--dx",
+            Math.cos(angle)*
+            distance+
+            "px"
+        );
+
+        p.style.setProperty(
+            "--dy",
+            Math.sin(angle)*
+            distance+
+            "px"
+        );
+
+
+        document.body.appendChild(p);
+
+        setTimeout(
+            ()=>p.remove(),
+            1000
+        );
+    }
+}
+
+
+/* =========================
+   FLYING MOTION
+========================= */
+
+function animatePrinceFlight(
+    from,
+    to,
+    duration
+){
+
+    return new Promise(resolve=>{
+
+        const start=
+            getWorldPosition(from);
+
+        const end=
+            getWorldPosition(to);
+
+
+        const startX=
+            start.x;
+
+        const startY=
+            start.y;
+
+        const endX=
+            end.x;
+
+        const endY=
+            end.y;
+
+
+        const dx=
+            endX-startX;
+
+        const dy=
+            endY-startY;
+
+
+        const distance=
+            Math.sqrt(
+                dx*dx+
+                dy*dy
+            );
+
+
+        const arc=
+            Math.min(
+                360,
+                Math.max(
+                    180,
+                    distance*.38
+                )
+            );
+
+
+        const controlX=
+            (startX+endX)/2;
+
+        const controlY=
+            (startY+endY)/2-
+            arc;
+
+
+        const startTime=
+            performance.now();
+
+
+        function frame(now){
+
+            const raw=
+                Math.min(
+                    1,
+                    (now-startTime)/
+                    duration
+                );
+
+
+            const t=
+                raw<.5
+                ?
+                4*raw*raw*raw
+                :
+                1-
+                Math.pow(
+                    -2*raw+2,
+                    3
+                )/2;
+
+
+            const x=
+                Math.pow(1-t,2)*
+                startX+
+
+                2*(1-t)*t*
+                controlX+
+
+                Math.pow(t,2)*
+                endX;
+
+
+            const y=
+                Math.pow(1-t,2)*
+                startY+
+
+                2*(1-t)*t*
+                controlY+
+
+                Math.pow(t,2)*
+                endY;
+
+
+            prince.style.left=
+                (x/2400*100)+"%";
+
+            prince.style.top=
+                (y/1650*100)+"%";
+
+
+            if(Math.random()<.72){
+
+                createFlightTrail();
+            }
+
+
+            if(Math.random()<.55){
+
+                createFlightParticle();
+            }
+
+
+            if(raw<1){
+
+                requestAnimationFrame(frame);
+
+            }else{
+
+                resolve();
+            }
+
+        }
+
+
+        requestAnimationFrame(frame);
+
+    });
+}
+
+
+/* =========================
+   TRAVEL
+========================= */
+
+async function travelTo(world){
+
+    if(flying)return;
+
+    if(currentWorld===world)return;
+
+
+    flying=true;
+
+
+    const from=
+        currentWorld ||
+        document.querySelector(".king");
+
+
+    const to=world;
+
+
+    previousWorld=from;
+
+    currentWorld=to;
+
+
+    document
+    .querySelectorAll(".world")
+    .forEach(w=>
+        w.classList.remove("selected")
+    );
+
+
+    to.classList.add("selected");
+
+
+    prince.classList.add("flying");
+
+
+    /*
+       Камера одновременно
+       начинает приближаться.
+    */
+
+    focusWorld(to);
+
+
+    /*
+       Реальный полёт по дуге.
+    */
+
+    await animatePrinceFlight(
+        from,
+        to,
+        2200
+    );
+
+
+    placePrince(to);
+
+    createArrivalBurst(to);
+
+
+    setTimeout(()=>{
+
+        prince.classList.remove(
+            "flying"
+        );
+
+        showWorldQuestion(to);
+
+        flying=false;
+
+    },250);
+}
+
+
+/* =========================
+   QUESTION
+========================= */
+
+function showWorldQuestion(world){
+
+    const id=
+        world.dataset.id;
+
+    const data=
+        worlds[id];
+
+
+    if(!data)return;
+
+
+    modalIcon.textContent=
+        data.icon;
+
+    modalTitle.textContent=
+        data.title;
+
+    modalQuestion.textContent=
+        data.question;
+
+
+    markVisited(world);
+
+
+    worldInfo.classList.add(
+        "active"
+    );
+}
+
+
+/* =========================
+   VISITED
+========================= */
+
+function markVisited(world){
+
+    const id=
+        world.dataset.id;
+
+
+    if(visited.has(id))return;
+
+
+    visited.add(id);
+
+
+    world.classList.add(
+        "visited"
+    );
+
+
+    visitedCount.textContent=
+        visited.size;
+}
+
+
+/* =========================
+   CLOSE
+========================= */
+
+function closeWorldInfo(){
+
+    worldInfo.classList.remove(
+        "active"
+    );
+
+
+    document
+    .querySelectorAll(".world")
+    .forEach(w=>
+        w.classList.remove("selected")
+    );
+
+
+    /*
+       Принц остаётся на планете.
+       Камера плавно возвращается
+       к общей карте.
+    */
+
+    setTimeout(()=>{
+
+        showOverview();
+
+        checkFinished();
+
+    },100);
+}
+
+
+/* =========================
+   FINISH
+========================= */
+
+function checkFinished(){
+
+    if(visited.size!==6)return;
+
+
+    setTimeout(()=>{
+
+        finish.style.display=
+            "flex";
+
+        createFireworks();
+
+    },900);
+}
+
+
+/* =========================
+   FIREWORKS
+========================= */
+
+function createFireworks(){
+
+    for(let i=0;i<65;i++){
+
+        setTimeout(()=>{
+
+            const f=
+                document.createElement("div");
+
+            f.className=
+                "firework";
+
+
+            f.style.left=
+                20+
+                Math.random()*60+
+                "%";
+
+            f.style.top=
+                15+
+                Math.random()*55+
+                "%";
+
+
+            const angle=
+                Math.random()*
+                Math.PI*2;
+
+            const distance=
+                60+
+                Math.random()*180;
+
+
+            f.style.setProperty(
+                "--x",
+                Math.cos(angle)*
+                distance+
+                "px"
+            );
+
+            f.style.setProperty(
+                "--y",
+                Math.sin(angle)*
+                distance+
+                "px"
+            );
+
+
+            document.body.appendChild(f);
+
+
+            setTimeout(
+                ()=>f.remove(),
+                1300
+            );
+
+        },i*25);
+    }
+}
+
+
+/* =========================
+   WORLD CLICK
+========================= */
+
+document
+.querySelectorAll(".world")
+.forEach(world=>{
+
+    world.addEventListener(
+        "click",
+        ()=>{
+
+            if(flying)return;
+
+            travelTo(world);
+
+        }
+    );
+
+});
+
+
+/* =========================
+   START
+========================= */
+
+document
+.getElementById("startBtn")
+.addEventListener(
+    "click",
+    ()=>{
+
+        intro.style.display=
+            "none";
+
+        showOverview();
+
+    }
+);
+
+
+/* =========================
+   CONTINUE
+========================= */
+
+document
+.getElementById("continueBtn")
+.addEventListener(
+    "click",
+    ()=>{
+
+        closeWorldInfo();
+
+    }
+);
+
+
+/* =========================
+   OUTSIDE MODAL
+========================= */
+
+worldInfo.addEventListener(
+    "click",
+    e=>{
+
+        if(e.target===worldInfo){
+
+            closeWorldInfo();
+
+        }
+
+    }
+);
+
+
+/* =========================
+   ESC
+========================= */
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.key==="Escape" &&
+            worldInfo.classList.contains(
+                "active"
+            )
+        ){
+
+            closeWorldInfo();
+
+        }
+
+    }
+);
+
+
+/* =========================
+   RESTART
+========================= */
+
+document
+.getElementById("restartBtn")
+.addEventListener(
+    "click",
+    ()=>{
+
+        visited.clear();
+
+
+        document
+        .querySelectorAll(".world")
+        .forEach(world=>{
+
+            world.classList.remove(
+                "visited"
+            );
+
+            world.classList.remove(
+                "selected"
+            );
+
+        });
+
+
+        visitedCount.textContent=
+            "0";
+
+
+        finish.style.display=
+            "none";
+
+
+        const first=
+            document.querySelector(
+                ".king"
+            );
+
+
+        currentWorld=
+            first;
+
+        previousWorld=
+            null;
+
+
+        placePrince(first);
+
+        showOverview();
+
+    }
+);
+
+
+/* =========================
+   INITIAL
+========================= */
+
+const firstWorld=
+    document.querySelector(".king");
+
+
+currentWorld=
+    firstWorld;
+
+
+placePrince(
+    firstWorld
+);
+
+
+showOverview();
+
+
+/* =========================
+   PLANET STARS
+========================= */
+
+document
+.querySelectorAll(".world")
+.forEach(world=>{
+
+    for(let i=0;i<7;i++){
+
+        const s=
+            document.createElement("div");
+
+
+        s.style.position=
+            "absolute";
+
+        s.style.width=
+            (2+Math.random()*3)+"px";
+
+        s.style.height=
+            s.style.width;
+
+        s.style.borderRadius=
+            "50%";
+
+        s.style.background=
+            "#fff";
+
+        s.style.opacity=
+            .4+
+            Math.random()*.5;
+
+        s.style.left=
+            Math.random()*270+"px";
+
+        s.style.top=
+            Math.random()*270+"px";
+
+        s.style.pointerEvents=
+            "none";
+
+        s.style.boxShadow=
+            "0 0 5px #fff";
+
+
+        s.style.animation=
+            "twinkle "+
+            (1.5+
+            Math.random()*3)+
+            "s ease-in-out infinite alternate";
+
+
+        world.appendChild(s);
+
+    }
+
+});
+
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener(
+    "resize",
+    ()=>{
+
+        if(
+            !worldInfo.classList.contains(
+                "active"
+            )
+        ){
+
+            showOverview();
+
+        }
+
+    }
+);
+
+
+/* =========================
+   PREVENT DOUBLE TOUCH
+========================= */
+
+document.addEventListener(
+    "touchstart",
+    ()=>{},
+    {passive:true}
+);
+
+</script>
+
+</body>
+</html>
